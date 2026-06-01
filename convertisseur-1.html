@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0c">
+<title>Convertir — Tout-en-un</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Albert+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0c;
+    --bg-2:#101013;
+    --panel:#15151a;
+    --panel-2:#1c1c22;
+    --line:#26262e;
+    --line-2:#33333d;
+    --ink:#f4f3f0;
+    --ink-dim:#9d9da8;
+    --ink-faint:#646470;
+    --gold:#d4b483;
+    --gold-deep:#b8935e;
+    --accent:#7dd0c8;
+    --warn:#e0a06a;
+    --radius:18px;
+    --shadow:0 24px 60px -20px rgba(0,0,0,.75);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    font-family:'Albert Sans',sans-serif;
+    background:
+      radial-gradient(1200px 700px at 85% -10%, rgba(212,180,131,.10), transparent 55%),
+      radial-gradient(900px 600px at 10% 110%, rgba(125,208,200,.07), transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    min-height:100dvh;
+    line-height:1.5;
+    overflow-x:hidden;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.4;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+  }
+  .wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:28px 18px 60px}
+
+  /* Header */
+  header{margin-bottom:22px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .mark{
+    width:42px;height:42px;border-radius:12px;flex:none;
+    background:linear-gradient(150deg,var(--gold),var(--gold-deep));
+    display:grid;place-items:center;color:#1a1305;font-weight:700;
+    box-shadow:0 8px 22px -8px rgba(212,180,131,.6);
+    font-family:'Fraunces',serif;font-size:22px;
+  }
+  .brand h1{font-family:'Fraunces',serif;font-weight:500;font-size:25px;letter-spacing:-.01em;line-height:1.05}
+  .brand p{color:var(--ink-faint);font-size:13px;margin-top:1px}
+
+  /* Category nav */
+  .cats{
+    display:flex;gap:8px;overflow-x:auto;padding:14px 2px 16px;margin:0 -2px 18px;
+    scrollbar-width:none;
+  }
+  .cats::-webkit-scrollbar{display:none}
+  .cat{
+    flex:none;display:flex;align-items:center;gap:7px;
+    padding:9px 15px;border-radius:999px;cursor:pointer;
+    background:var(--panel);border:1px solid var(--line);
+    color:var(--ink-dim);font-size:13.5px;font-weight:500;white-space:nowrap;
+    transition:.18s ease;
+  }
+  .cat svg{width:15px;height:15px}
+  .cat:hover{border-color:var(--line-2);color:var(--ink)}
+  .cat.active{
+    background:linear-gradient(150deg,rgba(212,180,131,.18),rgba(212,180,131,.06));
+    border-color:rgba(212,180,131,.5);color:var(--gold);
+  }
+
+  /* Panel */
+  .panel{
+    background:linear-gradient(180deg,var(--panel),var(--bg-2));
+    border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:22px;
+    animation:rise .4s cubic-bezier(.2,.7,.2,1) both;
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .phead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+  .ptitle{font-family:'Fraunces',serif;font-size:20px;font-weight:500;white-space:nowrap}
+  .pnote{font-size:12px;color:var(--ink-faint);white-space:nowrap}
+
+  /* Converter rows */
+  .conv{display:grid;gap:12px}
+  .swap-zone{position:relative;display:grid;gap:48px}
+  .field{
+    background:var(--panel-2);border:1px solid var(--line);border-radius:14px;
+    padding:13px 15px;transition:border-color .18s;overflow:hidden;
+  }
+  .field:focus-within{border-color:rgba(212,180,131,.55)}
+  .field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);margin-bottom:7px}
+  .field-row{display:flex;align-items:center;gap:10px;overflow:hidden}
+  .field input{
+    flex:1;min-width:0;background:none;border:none;outline:none;color:var(--ink);
+    font-family:'JetBrains Mono',monospace;font-size:25px;font-weight:500;letter-spacing:-.01em;
+    overflow:hidden;text-overflow:ellipsis;
+  }
+  .field input::placeholder{color:var(--ink-faint)}
+  select{
+    flex:0 0 auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    color:var(--ink);font-family:'Albert Sans',sans-serif;font-size:13px;font-weight:500;
+    padding:9px 28px 9px 10px;cursor:pointer;outline:none;
+    max-width:50%;min-width:0;overflow:hidden;
+    appearance:none;-webkit-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%239d9da8' stroke-width='2'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 10px center;
+  }
+  select:focus{border-color:rgba(212,180,131,.55)}
+
+  .swapbtn{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:40px;height:40px;border-radius:50%;z-index:3;
+    background:var(--panel);border:1px solid var(--line-2);color:var(--gold);
+    display:grid;place-items:center;cursor:pointer;transition:.2s;
+    box-shadow:0 6px 16px -6px rgba(0,0,0,.7);
+  }
+  .swapbtn:hover{transform:translate(-50%,-50%) rotate(180deg);border-color:var(--gold)}
+  .swapbtn svg{width:17px;height:17px}
+
+  /* Quick reference grid */
+  .refs{margin-top:20px;border-top:1px solid var(--line);padding-top:16px}
+  .refs h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);margin-bottom:11px;font-weight:600}
+  .ref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+  .ref{
+    background:var(--panel-2);border:1px solid var(--line);border-radius:11px;
+    padding:10px 12px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+    overflow:hidden;min-width:0;
+  }
+  .ref .v{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--gold);font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ref .u{font-size:12px;color:var(--ink-dim);flex:none;white-space:nowrap}
+
+  /* Currency status */
+  .status{
+    display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-faint);
+  }
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--warn)}
+  .dot.live{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+  .refresh{
+    background:none;border:1px solid var(--line);color:var(--ink-dim);border-radius:8px;
+    padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit;transition:.18s;
+  }
+  .refresh:hover{border-color:var(--gold);color:var(--gold)}
+
+  /* Time zone */
+  .tz-list{display:grid;gap:9px;margin-top:18px}
+  .tz{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:var(--panel-2);border:1px solid var(--line);border-radius:13px;padding:13px 15px;
+    overflow:hidden;
+  }
+  .tz-left{flex:1;min-width:0;overflow:hidden}
+  .tz-right{flex:none;text-align:right}
+  .tz .city{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tz .off{font-size:12px;color:var(--ink-faint);margin-top:2px}
+  .tz .time{font-family:'JetBrains Mono',monospace;font-size:22px;color:var(--gold);font-weight:500;white-space:nowrap}
+  .tz .date{font-size:11.5px;color:var(--ink-dim);text-align:right;margin-top:2px;white-space:nowrap}
+
+  /* Sizes */
+  .size-tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
+  .size-tab{
+    padding:7px 13px;border-radius:9px;background:var(--panel-2);border:1px solid var(--line);
+    color:var(--ink-dim);font-size:13px;cursor:pointer;font-weight:500;transition:.18s;
+  }
+  .size-tab.active{background:rgba(212,180,131,.14);border-color:rgba(212,180,131,.5);color:var(--gold)}
+  .size-search{margin-bottom:14px}
+  .size-search input{
+    width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:11px;
+    padding:11px 14px;color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:15px;outline:none;
+  }
+  .size-search input:focus{border-color:rgba(212,180,131,.55)}
+  .table-scroll{overflow-x:auto;border-radius:12px;border:1px solid var(--line);scrollbar-width:thin}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:380px}
+  th,td{padding:10px 12px;text-align:center;font-family:'JetBrains Mono',monospace;white-space:nowrap}
+  th{background:var(--panel-2);color:var(--ink-dim);font-family:'Albert Sans',sans-serif;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.05em;position:sticky;top:0}
+  td{border-top:1px solid var(--line);color:var(--ink-dim)}
+  tr.hit td{background:rgba(212,180,131,.12);color:var(--gold)}
+  tr.hit td:first-child{box-shadow:inset 3px 0 0 var(--gold)}
+
+  footer{text-align:center;margin-top:30px;color:var(--ink-faint);font-size:12px;line-height:1.7}
+  footer b{color:var(--gold);font-weight:600}
+  .hidden{display:none!important}
+
+  @media(max-width:560px){
+    .wrap{padding:22px 14px 50px}
+    .field input{font-size:20px}
+    select{max-width:46%;font-size:12px;padding:8px 24px 8px 9px}
+    .tz .time{font-size:19px}
+    .ref-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+    .phead{gap:8px}
+    .ptitle{font-size:18px}
+  }
+  @media(max-width:380px){
+    .field input{font-size:17px}
+    select{max-width:42%;font-size:11px}
+    .tz .time{font-size:17px}
+    .ref-grid{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="mark">C</div>
+      <div>
+        <h1>Convertir</h1>
+        <p>Devises · unités · fuseaux · tailles — hors ligne</p>
+      </div>
+    </div>
+  </header>
+
+  <nav class="cats" id="cats"></nav>
+
+  <main id="stage"></main>
+
+  <footer>
+    Fonctionne entièrement dans ton navigateur — aucune donnée envoyée.<br>
+    Taux de change <b>indicatifs</b> · rafraîchis en direct si tu es connecté.
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   DONNÉES
+   ============================================================ */
+
+// Icônes SVG inline (stroke)
+const ICON = {
+  cash:'<path d="M2 5h12v6H2z"/><circle cx="8" cy="8" r="2"/>',
+  ruler:'<path d="M2 6l8-4 4 8-8 4z"/><path d="M5 7l1 1M7 6l1 1M9 5l1 1"/>',
+  weight:'<path d="M4 6h8l1.5 8h-11z"/><circle cx="8" cy="4" r="1.5"/>',
+  temp:'<path d="M8 2v7"/><circle cx="8" cy="11" r="2.5"/>',
+  drop:'<path d="M8 2C5 6 4 8 4 10a4 4 0 008 0c0-2-1-4-4-8z"/>',
+  area:'<rect x="2.5" y="2.5" width="11" height="11" rx="1"/><path d="M2.5 6h11M6 2.5v11"/>',
+  speed:'<circle cx="8" cy="9" r="5.5"/><path d="M8 9l3-3"/>',
+  data:'<ellipse cx="8" cy="4" rx="5" ry="2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4"/>',
+  clock:'<circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1.5"/>',
+  shirt:'<path d="M5 2L2 4l1.5 2.5L5 6v8h6V6l1.5.5L14 4 11 2 8 4z"/>'
+};
+
+// Catégories d'unités (facteur = vers l'unité de base)
+const UNITS = {
+  length:{
+    label:'Longueur', icon:'ruler', base:'m',
+    units:{
+      mm:{n:'Millimètre',f:0.001}, cm:{n:'Centimètre',f:0.01}, m:{n:'Mètre',f:1},
+      km:{n:'Kilomètre',f:1000}, in:{n:'Pouce',f:0.0254}, ft:{n:'Pied',f:0.3048},
+      yd:{n:'Yard',f:0.9144}, mi:{n:'Mile',f:1609.344}, nmi:{n:'Mille marin',f:1852}
+    }, from:'m', to:'ft', val:1
+  },
+  weight:{
+    label:'Poids', icon:'weight', base:'kg',
+    units:{
+      mg:{n:'Milligramme',f:0.000001}, g:{n:'Gramme',f:0.001}, kg:{n:'Kilogramme',f:1},
+      t:{n:'Tonne',f:1000}, oz:{n:'Once',f:0.0283495}, lb:{n:'Livre (lb)',f:0.453592},
+      st:{n:'Stone',f:6.35029}
+    }, from:'kg', to:'lb', val:1
+  },
+  temp:{
+    label:'Température', icon:'temp', special:true,
+    units:{ c:{n:'Celsius (°C)'}, f:{n:'Fahrenheit (°F)'}, k:{n:'Kelvin (K)'} },
+    from:'c', to:'f', val:20
+  },
+  volume:{
+    label:'Volume', icon:'drop', base:'l',
+    units:{
+      ml:{n:'Millilitre',f:0.001}, cl:{n:'Centilitre',f:0.01}, l:{n:'Litre',f:1},
+      m3:{n:'Mètre cube',f:1000}, tsp:{n:'Cuillère à café',f:0.00492892},
+      tbsp:{n:'Cuillère à soupe',f:0.0147868}, cup:{n:'Tasse (US)',f:0.236588},
+      flozus:{n:'Once liquide (US)',f:0.0295735}, pt:{n:'Pinte (US)',f:0.473176},
+      gal:{n:'Gallon (US)',f:3.78541}, galuk:{n:'Gallon (UK)',f:4.54609}
+    }, from:'l', to:'cup', val:1
+  },
+  area:{
+    label:'Surface', icon:'area', base:'m2',
+    units:{
+      cm2:{n:'cm²',f:0.0001}, m2:{n:'m²',f:1}, ha:{n:'Hectare',f:10000},
+      km2:{n:'km²',f:1000000}, sqft:{n:'Pied carré',f:0.092903},
+      sqyd:{n:'Yard carré',f:0.836127}, acre:{n:'Acre',f:4046.86},
+      sqmi:{n:'Mile carré',f:2589988}
+    }, from:'m2', to:'sqft', val:1
+  },
+  speed:{
+    label:'Vitesse', icon:'speed', base:'ms',
+    units:{
+      ms:{n:'m/s',f:1}, kmh:{n:'km/h',f:0.277778}, mph:{n:'mph',f:0.44704},
+      kn:{n:'Nœud',f:0.514444}, fts:{n:'pied/s',f:0.3048}
+    }, from:'kmh', to:'mph', val:100
+  },
+  data:{
+    label:'Données', icon:'data', base:'B',
+    units:{
+      b:{n:'bit',f:0.125}, B:{n:'Octet',f:1}, KB:{n:'Ko (1000)',f:1000},
+      KiB:{n:'Kio (1024)',f:1024}, MB:{n:'Mo',f:1e6}, MiB:{n:'Mio',f:1048576},
+      GB:{n:'Go',f:1e9}, GiB:{n:'Gio',f:1073741824}, TB:{n:'To',f:1e12}
+    }, from:'MB', to:'MiB', val:100
+  }
+};
+
+// Devises (taux statiques de secours, base EUR — indicatifs)
+const CURR = {
+  base:'EUR',
+  names:{EUR:'Euro',USD:'Dollar US',GBP:'Livre',DZD:'Dinar algérien',MAD:'Dirham',
+    CHF:'Franc suisse',CAD:'Dollar can.',JPY:'Yen',CNY:'Yuan',AED:'Dirham EAU',
+    TND:'Dinar tunisien',TRY:'Livre turque',AUD:'Dollar aus.'},
+  fallback:{EUR:1,USD:1.08,GBP:0.85,DZD:145,MAD:10.7,CHF:0.95,CAD:1.47,JPY:163,
+    CNY:7.8,AED:3.97,TND:3.35,TRY:34.8,AUD:1.63},
+  rates:null, live:false, ts:null,
+  from:'EUR', to:'DZD', val:100
+};
+
+// Tailles de vêtements (tableaux de référence — approximatifs)
+const SIZES = {
+  active:'shoeW',
+  sets:{
+    shoeW:{ label:'Chaussures femme', cols:['EU','UK','US','CM'], rows:[
+      ['35','2.5','5','22'],['36','3.5','6','22.5'],['37','4','6.5','23.5'],
+      ['38','5','7.5','24'],['39','6','8.5','25'],['40','6.5','9','25.5'],
+      ['41','7.5','10','26.5'],['42','8','10.5','27']
+    ]},
+    shoeM:{ label:'Chaussures homme', cols:['EU','UK','US','CM'], rows:[
+      ['39','6','7','25'],['40','6.5','7.5','25.5'],['41','7.5','8.5','26.5'],
+      ['42','8','9','27'],['43','9','10','28'],['44','9.5','10.5','28.5'],
+      ['45','10.5','11.5','29.5'],['46','11','12','30'],['47','12','13','31']
+    ]},
+    clothW:{ label:'Vêtements femme', cols:['EU/FR','UK','US','IT','Taille'], rows:[
+      ['34','6','2','38','XS'],['36','8','4','40','S'],['38','10','6','42','S/M'],
+      ['40','12','8','44','M'],['42','14','10','46','L'],['44','16','12','48','L/XL'],
+      ['46','18','14','50','XL'],['48','20','16','52','XXL']
+    ]},
+    clothM:{ label:'Vêtements homme', cols:['EU','UK/US','Taille','Col (cm)'], rows:[
+      ['44','34','XS','36'],['46','36','S','37'],['48','38','M','39'],
+      ['50','40','L','41'],['52','42','XL','43'],['54','44','XXL','45'],
+      ['56','46','3XL','47']
+    ]}
+  }
+};
+
+// Fuseaux horaires
+const TZ = [
+  {city:'Paris', zone:'Europe/Paris'},
+  {city:'Alger', zone:'Africa/Algiers'},
+  {city:'Londres', zone:'Europe/London'},
+  {city:'New York', zone:'America/New_York'},
+  {city:'Dubaï', zone:'Asia/Dubai'},
+  {city:'Tokyo', zone:'Asia/Tokyo'},
+  {city:'Los Angeles', zone:'America/Los_Angeles'},
+  {city:'Montréal', zone:'America/Toronto'}
+];
+
+/* ============================================================
+   ÉTAT & RENDU
+   ============================================================ */
+const stage = document.getElementById('stage');
+const catsEl = document.getElementById('cats');
+
+const CATS = [
+  {id:'currency', label:'Devises', icon:'cash'},
+  ...Object.keys(UNITS).map(k=>({id:k, label:UNITS[k].label, icon:UNITS[k].icon})),
+  {id:'time', label:'Fuseaux', icon:'clock'},
+  {id:'sizes', label:'Tailles', icon:'shirt'}
+];
+
+let current = localStorage.getItem('conv_cat') || 'currency';
+if(!CATS.some(c=>c.id===current)) current='currency';
+
+function buildNav(){
+  catsEl.innerHTML='';
+  CATS.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='cat'+(c.id===current?' active':'');
+    b.innerHTML=`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round">${ICON[c.icon]}</svg>${c.label}`;
+    b.onclick=()=>{ current=c.id; localStorage.setItem('conv_cat',c.id); buildNav(); render(); };
+    catsEl.appendChild(b);
+  });
+}
+
+function fmt(n){
+  if(!isFinite(n)) return '—';
+  const a=Math.abs(n);
+  let d = a===0?0 : a<0.001?6 : a<1?4 : a<1000?3 : 2;
+  let s = n.toLocaleString('fr-FR',{maximumFractionDigits:d});
+  return s;
+}
+
+function optionsFor(units, sel){
+  return Object.keys(units).map(k=>
+    `<option value="${k}"${k===sel?' selected':''}>${units[k].n}</option>`).join('');
+}
+
+/* ---- Convertisseur d'unités générique ---- */
+function renderUnit(key){
+  const cfg = UNITS[key];
+  stage.innerHTML = `
+    <div class="panel">
+      <div class="phead">
+        <div class="ptitle">${cfg.label}</div>
+        <div class="pnote">Conversion instantanée</div>
+      </div>
+      <div class="conv">
+        <div class="swap-zone">
+          <div class="field">
+            <label>De</label>
+            <div class="field-row">
+              <input id="u-in" inputmode="decimal" value="${cfg.val}">
+              <select id="u-from">${optionsFor(cfg.units,cfg.from)}</select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Vers</label>
+            <div class="field-row">
+              <input id="u-out" readonly placeholder="0">
+              <select id="u-to">${optionsFor(cfg.units,cfg.to)}</select>
+            </div>
+          </div>
+          <button class="swapbtn" id="u-swap" aria-label="Inverser">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h8M4 6l2.5-2.5M12 10H4M12 10l-2.5 2.5"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="refs">
+        <h3>Équivalences rapides</h3>
+        <div class="ref-grid" id="u-refs"></div>
+      </div>
+    </div>`;
+
+  const inEl=document.getElementById('u-in'), outEl=document.getElementById('u-out');
+  const fromEl=document.getElementById('u-from'), toEl=document.getElementById('u-to');
+
+  function convert(v,from,to){
+    if(cfg.special) return tempConvert(v,from,to);
+    return v*cfg.units[from].f/cfg.units[to].f;
+  }
+  function update(){
+    const v=parseFloat(inEl.value.replace(',','.'));
+    cfg.val=isNaN(v)?'':inEl.value; cfg.from=fromEl.value; cfg.to=toEl.value;
+    outEl.value = isNaN(v)?'' : fmt(convert(v,fromEl.value,toEl.value));
+    // équivalences : 1 unité source vers toutes les autres
+    const refs=document.getElementById('u-refs'); refs.innerHTML='';
+    const baseV = isNaN(v)?1:v;
+    Object.keys(cfg.units).forEach(k=>{
+      if(k===fromEl.value) return;
+      const r=document.createElement('div'); r.className='ref';
+      r.innerHTML=`<span class="v">${fmt(convert(baseV,fromEl.value,k))}</span><span class="u">${k}</span>`;
+      refs.appendChild(r);
+    });
+  }
+  inEl.oninput=update; fromEl.onchange=update; toEl.onchange=update;
+  document.getElementById('u-swap').onclick=()=>{
+    const a=fromEl.value; fromEl.value=toEl.value; toEl.value=a;
+    if(outEl.value) inEl.value=outEl.value.replace(/\s/g,'').replace(',','.');
+    update();
+  };
+  update();
+}
+function tempConvert(v,from,to){
+  let c = from==='c'?v : from==='f'?(v-32)*5/9 : v-273.15;
+  return to==='c'?c : to==='f'?c*9/5+32 : c+273.15;
+}
+
+/* ---- Devises ---- */
+function renderCurrency(){
+  stage.innerHTML = `
+    <div class="panel">
+      <div class="phead">
+        <div class="ptitle">Devises</div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="status" id="c-status"><span class="dot"></span>Taux de secours</span>
+          <button class="refresh" id="c-refresh">Actualiser</button>
+        </div>
+      </div>
+      <div class="conv">
+        <div class="swap-zone">
+          <div class="field">
+            <label>Montant</label>
+            <div class="field-row">
+              <input id="c-in" inputmode="decimal" value="${CURR.val}">
+              <select id="c-from">${currOptions(CURR.from)}</select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Converti</label>
+            <div class="field-row">
+              <input id="c-out" readonly placeholder="0">
+              <select id="c-to">${currOptions(CURR.to)}</select>
+            </div>
+          </div>
+          <button class="swapbtn" id="c-swap" aria-label="Inverser">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h8M4 6l2.5-2.5M12 10H4M12 10l-2.5 2.5"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="refs">
+        <h3>1 ${CURR.from} équivaut à</h3>
+        <div class="ref-grid" id="c-refs"></div>
+      </div>
+    </div>`;
+
+  const inEl=document.getElementById('c-in'), outEl=document.getElementById('c-out');
+  const fromEl=document.getElementById('c-from'), toEl=document.getElementById('c-to');
+  const rates = CURR.rates || CURR.fallback;
+
+  function conv(v,from,to){ return v / rates[from] * rates[to]; }
+  function update(){
+    const r = CURR.rates || CURR.fallback;
+    const v=parseFloat(inEl.value.replace(',','.'));
+    CURR.val=isNaN(v)?'':inEl.value; CURR.from=fromEl.value; CURR.to=toEl.value;
+    outEl.value = isNaN(v)?'' : fmt(v / r[fromEl.value] * r[toEl.value]);
+    const refs=document.getElementById('c-refs'); refs.innerHTML='';
+    document.querySelector('.refs h3').textContent=`1 ${fromEl.value} équivaut à`;
+    Object.keys(CURR.names).forEach(k=>{
+      if(k===fromEl.value) return;
+      const r2=document.createElement('div'); r2.className='ref';
+      r2.innerHTML=`<span class="v">${fmt(1/r[fromEl.value]*r[k])}</span><span class="u">${k}</span>`;
+      refs.appendChild(r2);
+    });
+  }
+  inEl.oninput=update; fromEl.onchange=update; toEl.onchange=update;
+  document.getElementById('c-swap').onclick=()=>{
+    const a=fromEl.value; fromEl.value=toEl.value; toEl.value=a;
+    if(outEl.value) inEl.value=outEl.value.replace(/\s/g,'').replace(',','.');
+    update();
+  };
+  document.getElementById('c-refresh').onclick=()=>fetchRates(update);
+  setStatus();
+  update();
+  if(!CURR.rates) fetchRates(update); // tentative auto
+}
+function currOptions(sel){
+  return Object.keys(CURR.names).map(k=>
+    `<option value="${k}"${k===sel?' selected':''}>${k} — ${CURR.names[k]}</option>`).join('');
+}
+function setStatus(){
+  const s=document.getElementById('c-status'); if(!s) return;
+  if(CURR.live){
+    const t = CURR.ts ? new Date(CURR.ts).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : '';
+    s.innerHTML=`<span class="dot live"></span>Taux en direct · ${t}`;
+  } else {
+    s.innerHTML=`<span class="dot"></span>Taux de secours`;
+  }
+}
+function fetchRates(cb){
+  fetch('https://open.er-api.com/v6/latest/EUR')
+    .then(r=>r.json())
+    .then(d=>{
+      if(d && d.rates){
+        const out={}; let ok=true;
+        Object.keys(CURR.names).forEach(k=>{ if(d.rates[k]==null) ok=false; else out[k]=d.rates[k]; });
+        if(ok){ CURR.rates=out; CURR.live=true; CURR.ts=d.time_last_update_utc||Date.now(); setStatus(); cb&&cb(); }
+      }
+    })
+    .catch(()=>{ /* hors ligne : on garde le fallback */ });
+}
+
+/* ---- Fuseaux horaires ---- */
+let tzTimer=null;
+function renderTime(){
+  stage.innerHTML = `
+    <div class="panel">
+      <div class="phead">
+        <div class="ptitle">Fuseaux horaires</div>
+        <div class="pnote">Mise à jour en direct</div>
+      </div>
+      <div class="tz-list" id="tz-list"></div>
+    </div>`;
+  const list=document.getElementById('tz-list');
+  function paint(){
+    const now=new Date();
+    list.innerHTML='';
+    TZ.forEach(z=>{
+      const time=now.toLocaleTimeString('fr-FR',{timeZone:z.zone,hour:'2-digit',minute:'2-digit'});
+      const date=now.toLocaleDateString('fr-FR',{timeZone:z.zone,weekday:'short',day:'2-digit',month:'short'});
+      const off=tzOffset(z.zone);
+      const el=document.createElement('div'); el.className='tz';
+      el.innerHTML=`<div class="tz-left"><div class="city">${z.city}</div><div class="off">${off}</div></div>
+        <div class="tz-right"><div class="time">${time}</div><div class="date">${date}</div></div>`;
+      list.appendChild(el);
+    });
+  }
+  paint();
+  if(tzTimer) clearInterval(tzTimer);
+  tzTimer=setInterval(paint,1000);
+}
+function tzOffset(zone){
+  try{
+    const s=new Intl.DateTimeFormat('fr-FR',{timeZone:zone,timeZoneName:'shortOffset'})
+      .formatToParts(new Date()).find(p=>p.type==='timeZoneName');
+    return s?s.value.replace('UTC','UTC '):'';
+  }catch(e){return ''}
+}
+
+/* ---- Tailles ---- */
+function renderSizes(){
+  const tabs=Object.keys(SIZES.sets).map(k=>
+    `<button class="size-tab${k===SIZES.active?' active':''}" data-k="${k}">${SIZES.sets[k].label}</button>`).join('');
+  stage.innerHTML = `
+    <div class="panel">
+      <div class="phead">
+        <div class="ptitle">Tailles</div>
+        <div class="pnote">Correspondances approximatives</div>
+      </div>
+      <div class="size-tabs">${tabs}</div>
+      <div class="size-search">
+        <input id="s-search" inputmode="decimal" placeholder="Tape une taille (ex : 40) pour la surligner…">
+      </div>
+      <div class="table-scroll"><div id="s-table"></div></div>
+    </div>`;
+
+  function paintTable(filter){
+    const set=SIZES.sets[SIZES.active];
+    const f=(filter||'').trim().replace(',','.').toLowerCase();
+    let html='<table><thead><tr>'+set.cols.map(c=>`<th>${c}</th>`).join('')+'</tr></thead><tbody>';
+    set.rows.forEach(r=>{
+      const hit = f && r.some(c=>String(c).toLowerCase()===f);
+      html+=`<tr class="${hit?'hit':''}">`+r.map(c=>`<td>${c}</td>`).join('')+'</tr>';
+    });
+    html+='</tbody></table>';
+    document.getElementById('s-table').innerHTML=html;
+  }
+  document.querySelectorAll('.size-tab').forEach(b=>{
+    b.onclick=()=>{ SIZES.active=b.dataset.k;
+      document.querySelectorAll('.size-tab').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active'); paintTable(document.getElementById('s-search').value); };
+  });
+  document.getElementById('s-search').oninput=e=>paintTable(e.target.value);
+  paintTable('');
+}
+
+/* ---- Routeur ---- */
+function render(){
+  if(tzTimer){ clearInterval(tzTimer); tzTimer=null; }
+  if(current==='currency') renderCurrency();
+  else if(current==='time') renderTime();
+  else if(current==='sizes') renderSizes();
+  else renderUnit(current);
+}
+
+buildNav();
+render();
+</script>
+</body>
+</html>
